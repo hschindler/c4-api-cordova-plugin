@@ -1,0 +1,12 @@
+{
+  "name": "c4-api-cordova-plugin",
+  "version": "1.0.0",
+  "cordova": {
+    "id": "c4-api-cordova-plugin",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "description": "Cordova Plugin for ID Tronic C4 Red"
+}
