@@ -4,18 +4,35 @@ var exec = require('cordova/exec');
 var PLUGIN_NAME = 'C4ApiCordovaPlugin';
 
 var C4ApiCordovaPlugin = {
-  echo: function(phrase, cb) {
-    exec(cb, null, PLUGIN_NAME, 'echo', [phrase]);
+  common: {
+    getFirmware: function (cb, errorCb) {
+      exec(cb, errorCb, PLUGIN_NAME, 'getFirmware', []);
+    }
   },
-  getFirmware: function(cb, errorCb) {
-    exec(cb, errorCb, PLUGIN_NAME, 'getFirmware', []);
+  uhf: {
+    startInventory: function (cb, errorCb) {
+      exec(cb, errorCb, PLUGIN_NAME, 'startInventory', []);
+    },
+    stopInventory: function () {
+      exec(null, null, PLUGIN_NAME, 'stopInventory', []);
+    },
+    setOutputPower: function (power, cb, errorCb) {
+      exec(cb, errorCb, PLUGIN_NAME, 'setOutputPower', [power]);
+    }
   },
-  startInventory: function(cb, errorCb) {
-    exec(cb, errorCb, PLUGIN_NAME, 'startInventory', []);
-  },
-  stopInventory: function() {
-    exec(null, null, PLUGIN_NAME, 'stopInventory', []);
+  barcode: {
+    open: function (cb, errorCb) {
+      exec(cb, errorCb, PLUGIN_NAME, 'openBarcode', []);
+    },
+    close: function () {
+      exec(null, null, PLUGIN_NAME, 'closeBarcode', []);
+    },
+    scan: function (cb, errorCb) {
+      exec(cb, errorCb, PLUGIN_NAME, 'scanBarcode', []);
+    }
   }
+
+
 };
 
 module.exports = C4ApiCordovaPlugin;
