@@ -21,15 +21,16 @@ var C4ApiCordovaPlugin = {
     }
   },
   barcode: {
-    open: function (cb, errorCb) {
-      exec(cb, errorCb, PLUGIN_NAME, 'openBarcode', []);
-    },
-    close: function () {
-      exec(null, null, PLUGIN_NAME, 'closeBarcode', []);
-    },
     scan: function (cb, errorCb) {
       exec(cb, errorCb, PLUGIN_NAME, 'scanBarcode', []);
     }
+    // open: function (cb, errorCb) {
+    //   exec(cb, errorCb, PLUGIN_NAME, 'openBarcode', []);
+    // },
+    // close: function () {
+    //   exec(null, null, PLUGIN_NAME, 'closeBarcode', []);
+    // }
+
   }
 
 
