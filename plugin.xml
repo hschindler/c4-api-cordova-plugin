@@ -45,22 +45,6 @@
       <source-file src="src/android/libs/armeabi/libPSAM.so" target-dir="libs/armeabi/" />
       <source-file src="src/android/libs/armeabi/libSerialPort.so" target-dir="libs/armeabi/" />
 
-       <!-- <lib-file src="src/android/libs/android-support-v4.jar"  />
-       <lib-file src="src/android/libs/decoderapijni.jar"  />
-        <lib-file src="src/android/libs/handheldApi.jar"  />
-        <lib-file src="src/android/libs/ModuleAPI_Android_2.2.0.0.jar"  />
-
-      <lib-file src="src/android/libs/armeabi/libandroid_060.so"  />
-      <lib-file src="src/android/libs/armeabi/libdevapi.so"  />
-      <lib-file src="src/android/libs/armeabi/libDeviceAPI.so" />
-      <lib-file src="src/android/libs/armeabi/libFpCore.so"  />
-      <lib-file src="src/android/libs/armeabi/libfxjni.so"  />
-      <lib-file src="src/android/libs/armeabi/libirdaSerialPort.so"  />
-      <lib-file src="src/android/libs/armeabi/libModuleAPI_Android_Arm.so"  />
-      <lib-file src="src/android/libs/armeabi/libNETLH_E.so"  />
-      <lib-file src="src/android/libs/armeabi/libPSAM.so"  />
-      <lib-file src="src/android/libs/armeabi/libSerialPort.so"  /> -->
-
       <source-file src="src/android/de/c4Api/EPC.java" target-dir="src/de/c4Api/" />
       <source-file src="src/android/de/c4Api/C4ApiCordovaPlugin.java" target-dir="src/de/c4Api/" />
       
