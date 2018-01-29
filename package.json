@@ -1,6 +1,6 @@
 {
   "name": "c4-api-cordova-plugin",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "cordova": {
     "id": "c4-api-cordova-plugin",
     "platforms": [
