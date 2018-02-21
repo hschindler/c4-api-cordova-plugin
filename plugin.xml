@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     
     id="c4-api-cordova-plugin"
-    version="1.0.1">
+    version="1.0.2">
     <name>C4 Api Cordova Plugin</name>
     <description>Cordova Plugin for ID Tronic C4 Red API with NEWLAND 2D Scanner</description>
     <license>MIT</license>
