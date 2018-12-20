@@ -1,34 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    
     id="c4-api-cordova-plugin"
-    version="1.0.0">
+    version="1.0.2">
     <name>C4 Api Cordova Plugin</name>
-    <description>Cordova Plugin for ID Tronic C4 Red API</description>
+    <description>Cordova Plugin for ID Tronic C4 Red API with NEWLAND 2D Scanner</description>
     <license>MIT</license>
     <keywords></keywords>
-    <repo>https://github.com/driftyco/cordova-plugin-template.git</repo>
-    <issue>https://github.com/driftyco/cordova-plugin-template/issues</issue>
+    <repo>https://github.com/hschindler/c4-api-cordova-plugin.git</repo>
+    <issue>https://github.com/hschindler/c4-api-cordova-plugin.git/issues</issue>
 
-    <!-- android -->
-    <platform name="android">
-      <js-module src="www/plugin.js" name="plugin">
+    <js-module src="www/plugin.js" name="plugin">
         <runs/>
 
         <!-- This is the window variable name you want, like window.MyCordovaPlugin -->
         <clobbers target="C4ApiCordovaPlugin" />
-      </js-module>
-      <config-file target="res/xml/config.xml" parent="/*">
-        <feature name="C4ApiCordovaPlugin">
-          <param name="android-package" value="de.c4Api.C4ApiCordovaPlugin" />
-          <param name="onload" value="true" />
-        </feature>
-      </config-file>
+    </js-module>
 
-      <framework src="src/android/extras.gradle" custom="true" type="gradleReference" />
+    <!-- android -->
+    <platform name="android">
+      
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="C4ApiCordovaPlugin">
+                <param name="android-package" value="de.c4Api.C4ApiCordovaPlugin" />
+                <param name="onload" value="true" />
+            </feature>        
+        </config-file> 
 
-      <source-file src="src/android/de/c4Api/EPC.java" target-dir="src/de/c4Api/" />
-      <source-file src="src/android/de/c4Api/C4ApiCordovaPlugin.java" target-dir="src/de/c4Api/" />
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.CAMERA" />
+        </config-file>
+
+        <framework src="src/android/extras.gradle" custom="true" type="gradleReference" />
+
+        <source-file src="src/android/de/c4Api/EPC.java" target-dir="src/de/c4Api/" />
+        <source-file src="src/android/de/c4Api/C4ApiCordovaPlugin.java" target-dir="src/de/c4Api/" />
+
+        <!-- <source-file src="src/android/libs/android-support-v4.jar" target-dir="libs" /> -->
+        <source-file src="src/android/libs/ModuleAPI_Android_2.2.0.0.jar" target-dir="libs" />
+        <source-file src="src/android/libs/decoderapijni.jar" target-dir="libs" />
+        <source-file src="src/android/libs/handheldApi.jar" target-dir="libs" />
+        
+        <source-file src="src/android/libs/armeabi/libdevapi.so" target-dir="libs/armeabi" />        
+        <source-file src="src/android/libs/armeabi/libirdaSerialPort.so" target-dir="libs/armeabi" /> 
+        
+            
+
 
       <!-- <source-file src="src/android/libs/decoderapijni.jar" target-dir="libs" />        
       <source-file src="src/android/libs/handheldApi.jar" target-dir="libs" />        

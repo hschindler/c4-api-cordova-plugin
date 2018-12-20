@@ -1,6 +1,7 @@
 {
   "name": "c4-api-cordova-plugin",
-  "version": "1.0.0",
+  "version": "1.0.3",
+  "description": "Cordova Plugin for ID Tronic C4 Red PDA",
   "cordova": {
     "id": "c4-api-cordova-plugin",
     "platforms": [
@@ -8,5 +9,24 @@
       "ios"
     ]
   },
-  "description": "Cordova Plugin for ID Tronic C4 Red PDA"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hschindler/c4-api-cordova-plugin.git"
+  },
+  "author": {
+    "name": "Heiko Schindler"
+  },
+  "engines": {
+    "cordovaDependencies": {
+      "1.0.3": {
+        "cordova-android": ">6.0.0"
+      }
+    }
+  },
+  "keywords": [
+    "cordova",
+    "device",
+    "ecosystem:cordova",
+    "cordova-android"
+  ]
 }
