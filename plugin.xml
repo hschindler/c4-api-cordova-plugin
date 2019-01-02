@@ -20,6 +20,10 @@
 
     <!-- android -->
     <platform name="android">
+
+        <hook type="before_plugin_install" src="scripts/update_build_gradle.js" />
+        
+    
       
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="C4ApiCordovaPlugin">
@@ -44,6 +48,9 @@
         
         <source-file src="src/android/libs/armeabi/libdevapi.so" target-dir="libs/armeabi" />        
         <source-file src="src/android/libs/armeabi/libirdaSerialPort.so" target-dir="libs/armeabi" /> 
+
+        <source-file src="src/android/libs/armeabi-v7a/libdevapi.so" target-dir="libs/armeabi-v7a" />        
+        <source-file src="src/android/libs/armeabi-v7a/libirdaSerialPort.so" target-dir="libs/armeabi-v7a" /> 
         
             
 
@@ -75,21 +82,5 @@
       <source-file src="src/android/libs/armeabi-v7a/libSerialPort.so" target-dir="libs/armeabi-v7a" />       -->
       
 
-    </platform>
-
-    <!-- ios -->
-    <platform name="ios">
-        <js-module src="www/plugin.js" name="plugin">
-            <runs/>
-            <clobbers target="C4ApiCordovaPlugin" />
-        </js-module>
-        <config-file target="config.xml" parent="/*">
-            <feature name="C4ApiCordovaPlugin">
-                <param name="ios-package" value="C4ApiCordovaPlugin" onload="true" />
-            </feature>
-        </config-file>
-
-        <header-file src="src/ios/C4ApiCordovaPlugin.h" />
-        <source-file src="src/ios/C4ApiCordovaPlugin.m" />
     </platform>
 </plugin>

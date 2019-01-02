@@ -31,7 +31,6 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
     private UhfManager _uhfManager;
     private Barcode1DManager _barcodeManager;
 
-
     private boolean _barcodeInitFlag = false;
     private boolean _initRuns = false;
 
@@ -88,23 +87,24 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
             _uhfManager = UhfManager.getInstance();
         } catch (Exception e) {
             _errorLog = e.getMessage();
-            //   e.printStackTrace();
-            //   Log.d(TAG, "Error: " + e.getMessage());
+            e.printStackTrace();
+            // Log.d(TAG, "Error: " + e.getMessage());
         }
 
         try {
             _barcodeManager = new Barcode1DManager();
             _barcodeManager.Open(barcodeHandler);
-        } catch(Exception e) {
-
+        } catch (Exception e) {
+            _errorLog = e.getMessage();
+            e.printStackTrace();
         }
 
-        //        try {
-        //            Thread.sleep(3000);
-        //        } catch (InterruptedException e)
-        //        {
+        // try {
+        // Thread.sleep(3000);
+        // } catch (InterruptedException e)
+        // {
         //
-        //        }
+        // }
 
         Thread thread = new InventoryThread();
         thread.start();
@@ -126,22 +126,28 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
                 return true;
             }
 
-            final byte[] firmwareVersion = _uhfManager.getFirmware();
+            try {
+                final byte[] firmwareVersion = _uhfManager.getFirmware();
+
+                cordova.getActivity().runOnUiThread(new Runnable() {
+
+                    public void run() {
+
+                        // String test = "test 1111";
+                        // callbackContext.success(firmwareVersion);
+
+                        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, firmwareVersion);
+                        callbackContext.sendPluginResult(pluginResult);
+                    }
+
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+
             // cordova.getThreadPool().execute(new Runnable() {
             // public void run() {
-
-            cordova.getActivity().runOnUiThread(new Runnable() {
-
-                public void run() {
-
-                    // String test = "test 1111";
-                    // callbackContext.success(firmwareVersion);
-
-                    PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, firmwareVersion);
-                    callbackContext.sendPluginResult(pluginResult);
-                }
-
-            });
 
             return true;
         } else if (action.equals("startInventory")) {
@@ -152,7 +158,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
                 return true;
             }
 
-            //start inventory thread
+            // start inventory thread
             startFlag = true;
 
             _listEPCObject = new ArrayList<EPC>();
@@ -186,26 +192,26 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
             // return true;
         } else if (action.equals("closeBarcode")) {
             // try {
-            // 	_barcodeManager.Close();
+            // _barcodeManager.Close();
             // } catch (Exception e) {
-            // 	_errorLog = e.getMessage();
-            // 	return false;
+            // _errorLog = e.getMessage();
+            // return false;
             // }
 
             return true;
         } else if (action.equals("scanBarcode")) {
 
             try {
-            	this._barcodeCallBackContext = callbackContext;
-            	_barcodeManager.Scan();
+                this._barcodeCallBackContext = callbackContext;
+                _barcodeManager.Scan();
             } catch (Exception e) {
-            	_errorLog = e.getMessage();
+                _errorLog = e.getMessage();
 
-            	PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, _errorLog);
-            	pluginResult.setKeepCallback(true);
-            	_barcodeCallBackContext.sendPluginResult(pluginResult);
+                PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, _errorLog);
+                pluginResult.setKeepCallback(true);
+                _barcodeCallBackContext.sendPluginResult(pluginResult);
 
-            	return false;
+                return false;
             }
 
             return true;
@@ -216,44 +222,46 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
             // // byte[] resultByte = null;
 
             // if (_barcodeInitFlag) {
-            //     try {
-            //         boolean is = _barcodeScaner.callbackKeepGoing();
-            //         Thread.sleep(50);
-            //         _barcodeScaner.waitForDecodeTwo(3000, _barcodeScanerResult);
-            //         //_barcodeScaner.waitForDecode(3000) ;
-            //         result = _barcodeScaner.getBarcodeData();
-            //         // resultByte = _barcodeScaner.getBarcodeByteData();
-            //         if (result != null) {
-            //             // Log.e(TAG, result);
-            //             PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
-            //             _barcodeCallBackContext.sendPluginResult(pluginResult);
-            //         }
-            //     } catch (DecoderException e) {
-            //         // TODO Auto-generated catch block
-            //         // e.printStackTrace();
-            //         _errorLog = e.getMessage();
+            // try {
+            // boolean is = _barcodeScaner.callbackKeepGoing();
+            // Thread.sleep(50);
+            // _barcodeScaner.waitForDecodeTwo(3000, _barcodeScanerResult);
+            // //_barcodeScaner.waitForDecode(3000) ;
+            // result = _barcodeScaner.getBarcodeData();
+            // // resultByte = _barcodeScaner.getBarcodeByteData();
+            // if (result != null) {
+            // // Log.e(TAG, result);
+            // PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
+            // _barcodeCallBackContext.sendPluginResult(pluginResult);
+            // }
+            // } catch (DecoderException e) {
+            // // TODO Auto-generated catch block
+            // // e.printStackTrace();
+            // _errorLog = e.getMessage();
 
-            //         PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, _errorLog);
-            //         pluginResult.setKeepCallback(true);
-            //         _barcodeCallBackContext.sendPluginResult(pluginResult);
+            // PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR,
+            // _errorLog);
+            // pluginResult.setKeepCallback(true);
+            // _barcodeCallBackContext.sendPluginResult(pluginResult);
 
-            //         return true;
-            //     } catch (InterruptedException e) {
-            //         // TODO Auto-generated catch block
-            //         // e.printStackTrace();
+            // return true;
+            // } catch (InterruptedException e) {
+            // // TODO Auto-generated catch block
+            // // e.printStackTrace();
 
-            //         _errorLog = e.getMessage();
+            // _errorLog = e.getMessage();
 
-            //         PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, _errorLog);
-            //         pluginResult.setKeepCallback(true);
-            //         _barcodeCallBackContext.sendPluginResult(pluginResult);
+            // PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR,
+            // _errorLog);
+            // pluginResult.setKeepCallback(true);
+            // _barcodeCallBackContext.sendPluginResult(pluginResult);
 
-            //         return true;
-            //     }
+            // return true;
+            // }
             // } else {
 
-            //     callbackContext.error("Barcode API not installed");
-            //     return true;
+            // callbackContext.error("Barcode API not installed");
+            // return true;
             // }
 
             // callbackContext.error("Barcode read success");
@@ -261,16 +269,17 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
 
             // -------
             // try {
-            // 	this._barcodeCallBackContext = callbackContext;
-            // 	_barcodeManager.Scan();
+            // this._barcodeCallBackContext = callbackContext;
+            // _barcodeManager.Scan();
             // } catch (Exception e) {
-            // 	_errorLog = e.getMessage();
+            // _errorLog = e.getMessage();
 
-            // 	PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, _errorLog);
-            // 	pluginResult.setKeepCallback(true);
-            // 	_barcodeCallBackContext.sendPluginResult(pluginResult);
+            // PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR,
+            // _errorLog);
+            // pluginResult.setKeepCallback(true);
+            // _barcodeCallBackContext.sendPluginResult(pluginResult);
 
-            // 	return false;
+            // return false;
             // }
 
             // return true;
@@ -293,15 +302,15 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
         Barcode1DManager.Port = _barcodePort;
         Barcode1DManager.Power = _barcodePower;
         // if (manager == null) {
-        // 	textVersion.setText(getString(R.string.serialport_init_fail_));
-        // 	setButtonClickable(buttonClear, false);
-        // 	setButtonClickable(buttonStart, false);
-        // 	return;
+        // textVersion.setText(getString(R.string.serialport_init_fail_));
+        // setButtonClickable(buttonClear, false);
+        // setButtonClickable(buttonStart, false);
+        // return;
         // }
         // try {
-        // 	Thread.sleep(1000);
+        // Thread.sleep(1000);
         // } catch (InterruptedException e) {
-        // 	e.printStackTrace();
+        // e.printStackTrace();
         // }
 
         // manager.setOutputPower(power);
@@ -309,7 +318,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
         // byte[] version_bs = manager.getFirmware();
         // setTitle(R.string.uhf_demo);
         // if (version_bs!=null){
-        // 	textView_title_config.append("-"+new String(version_bs));
+        // textView_title_config.append("-"+new String(version_bs));
         // }
     }
 
@@ -321,10 +330,10 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
         }
 
         if (_barcodeManager != null) {
-         	_barcodeManager.Close();
-         }
+            _barcodeManager.Close();
+        }
 
-        //closeBarcode();
+        // closeBarcode();
 
         super.onDestroy();
     }
@@ -336,64 +345,64 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
     }
 
     // private JSONArray ConvertList(List<String> list) {
-    // 	org.json.JSONArray jsonArray = new org.json.JSONArray();
-    // 	for(String value : list) {
-    // 		jsonArray.put(value);
-    // 	}
+    // org.json.JSONArray jsonArray = new org.json.JSONArray();
+    // for(String value : list) {
+    // jsonArray.put(value);
+    // }
 
-    // 	return jsonArray;
+    // return jsonArray;
     // }
 
     // private void initBarcode() {
-    //     try {
-    //         _barcodeScaner.disableSymbology(SymbologyID.SYM_ALL);
-    //         _barcodeScaner.enableSymbology(SymbologyID.SYM_ALL);
-    //         //			mDecoder.enableSymbology(SymbologyID.SYM_QR);
-    //         //			mDecoder.enableSymbology(SymbologyID.SYM_PDF417);
-    //         //			mDecoder.enableSymbology(SymbologyID.SYM_EAN13);
-    //         //			mDecoder.enableSymbology(SymbologyID.SYM_DATAMATRIX) ;
-    //         //			
-    //         //			mDecoder.enableSymbology(SymbologyID.SYM_INT25);
+    // try {
+    // _barcodeScaner.disableSymbology(SymbologyID.SYM_ALL);
+    // _barcodeScaner.enableSymbology(SymbologyID.SYM_ALL);
+    // // mDecoder.enableSymbology(SymbologyID.SYM_QR);
+    // // mDecoder.enableSymbology(SymbologyID.SYM_PDF417);
+    // // mDecoder.enableSymbology(SymbologyID.SYM_EAN13);
+    // // mDecoder.enableSymbology(SymbologyID.SYM_DATAMATRIX) ;
+    // //
+    // // mDecoder.enableSymbology(SymbologyID.SYM_INT25);
 
-    //         //			mDecoder.enableSymbology(SymbologyID.SYM_UPCA);
-    //         //			mDecoder.enableSymbology(SymbologyID.SYM_CHINAPOST);
-    //         //			
-    //         //			mDecoder.enableSymbology(SymbologyID.SYM_CODE39);
-    //         //			mDecoder.enableSymbology(SymbologyID.SYM_CODE128); 
-    //         //			mDecoder.enableSymbology(SymbologyID.SYM_EAN8);
-    //         //			mDecoder.enableSymbology(SymbologyID.SYM_CODE32);
-    //         //EAN13
-    //         SymbologyConfig config = new SymbologyConfig(SymbologyID.SYM_EAN13);
-    //         config.Flags = 5;
-    //         config.Mask = 1;
-    //         _barcodeScaner.setSymbologyConfig(config);
+    // // mDecoder.enableSymbology(SymbologyID.SYM_UPCA);
+    // // mDecoder.enableSymbology(SymbologyID.SYM_CHINAPOST);
+    // //
+    // // mDecoder.enableSymbology(SymbologyID.SYM_CODE39);
+    // // mDecoder.enableSymbology(SymbologyID.SYM_CODE128);
+    // // mDecoder.enableSymbology(SymbologyID.SYM_EAN8);
+    // // mDecoder.enableSymbology(SymbologyID.SYM_CODE32);
+    // //EAN13
+    // SymbologyConfig config = new SymbologyConfig(SymbologyID.SYM_EAN13);
+    // config.Flags = 5;
+    // config.Mask = 1;
+    // _barcodeScaner.setSymbologyConfig(config);
 
-    //         _barcodeScaner.setLightsMode(LightsMode.ILLUM_AIM_ON);
-    //         try {
-    //             _barcodeScaner.startScanning();
-    //             Thread.sleep(50);
-    //             _barcodeScaner.stopScanning();
-    //         } catch (Exception e) {
-    //             // TODO Auto-generated catch block
-    //             e.printStackTrace();
-    //         }
+    // _barcodeScaner.setLightsMode(LightsMode.ILLUM_AIM_ON);
+    // try {
+    // _barcodeScaner.startScanning();
+    // Thread.sleep(50);
+    // _barcodeScaner.stopScanning();
+    // } catch (Exception e) {
+    // // TODO Auto-generated catch block
+    // e.printStackTrace();
+    // }
 
-    //     } catch (DecoderException e) {
-    //         // TODO Auto-generated catch block
-    //         e.printStackTrace();
-    //     }
+    // } catch (DecoderException e) {
+    // // TODO Auto-generated catch block
+    // e.printStackTrace();
+    // }
     // }
 
     // public void closeBarcode() {
-    //    if (_barcodeInitFlag) {
-    //        try {
-    //            _barcodeScaner.disconnectDecoderLibrary();
-    //        } catch (DecoderException e) {
-    //           // TODO Auto-generated catch block
-    //            e.printStackTrace();
-    //        }
-    //    }
-    //}
+    // if (_barcodeInitFlag) {
+    // try {
+    // _barcodeScaner.disconnectDecoderLibrary();
+    // } catch (DecoderException e) {
+    // // TODO Auto-generated catch block
+    // e.printStackTrace();
+    // }
+    // }
+    // }
 
     private JSONArray ConvertArrayList(ArrayList<String> list) {
         org.json.JSONArray jsonArray = new org.json.JSONArray();
@@ -419,13 +428,13 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
                     // manager.stopInventoryMulti()
                     epcList = _uhfManager.inventoryRealTime(); // inventory real time
                     if (epcList != null && !epcList.isEmpty()) {
-                        // play sound 
+                        // play sound
                         // Util.play(1, 0);
                         tidList = new ArrayList<String>();
 
                         for (byte[] epc : epcList) {
                             // String epcStr = Tools.Bytes2HexString(epc,
-                            // 		epc.length);
+                            // epc.length);
                             // addToList(_listEPCObject, epcStr);
                             if (SelectEPC(epc)) {
                                 byte[] tid = GetTID();
@@ -476,11 +485,14 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
 
         // first select tag by epc
         private byte[] GetTID() {
-            // Parameters: int memBank store RESEVER zone 0, EPC District 1, TID District 2, USER District 3;
-            // int startAddr starting address (not too large, depending on the size of the data area);
-            // int length read data length, in units of word (1word = 2bytes); byte [] accessPassword password 4 bytes
-            int tidLength = 6; // in word 1 word  = 2 byte
-            //byte[] tid; // = new byte[tidLength*2];
+            // Parameters: int memBank store RESEVER zone 0, EPC District 1, TID District 2,
+            // USER District 3;
+            // int startAddr starting address (not too large, depending on the size of the
+            // data area);
+            // int length read data length, in units of word (1word = 2bytes); byte []
+            // accessPassword password 4 bytes
+            int tidLength = 6; // in word 1 word = 2 byte
+            // byte[] tid; // = new byte[tidLength*2];
 
             try {
                 byte[] pw = new byte[4];
@@ -525,7 +537,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
         }
     } // end inventory thread
 
-    //add TIDs to view
+    // add TIDs to view
     private void returnCurrentTIDs(final ArrayList<String> tidList) {
         cordova.getActivity().runOnUiThread(new Runnable() {
 
