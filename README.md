@@ -1,7 +1,7 @@
 C4 aPI Cordova Plugin
 ======
 
-Cordova Plugin for ID Tronic C4 Red on iOS and Android.
+Cordova Plugin for ID Tronic C4 Red on Android.
 You need cordova-android version > 7.0.0
 The plugin use a hook to create an build-extras.gradle file in your app under platforms/android/app.
 
