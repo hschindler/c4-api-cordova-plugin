@@ -21,9 +21,7 @@
     <!-- android -->
     <platform name="android">
 
-        <hook type="before_plugin_install" src="scripts/update_build_gradle.js" />
-        
-    
+        <hook type="before_plugin_install" src="scripts/update_build_gradle.js" />       
       
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="C4ApiCordovaPlugin">
