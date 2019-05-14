@@ -535,7 +535,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
 
             return null;
         }
-    } // end inventory thread
+    } // end inventory thread class
 
     // add TIDs to view
     private void returnCurrentTIDs(final ArrayList<String> tidList) {
