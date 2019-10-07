@@ -9,7 +9,7 @@ Use:
 
 const that = this;
 
-(<any>window).C4ApiCordovaPlugin.getFirmware(function(result: ArrayBuffer) {
+(<any>window).C4ApiCordovaPlugin.common.getFirmware(function(result: ArrayBuffer) {
     console.log('Firmware: ', result);
 
     // show on ui
@@ -30,7 +30,7 @@ UHF inventory (TID):
 
 const that = this;
 
-(<any>window).C4ApiCordovaPlugin.startInventory(function(result) {
+(<any>window).C4ApiCordovaPlugin.uhf.startInventory(function(result) {
 
     that.zone.run(()=> {
         that.tidList = result;
