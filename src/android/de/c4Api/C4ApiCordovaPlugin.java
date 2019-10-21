@@ -136,8 +136,14 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
                         // String test = "test 1111";
                         // callbackContext.success(firmwareVersion);
 
-                        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, firmwareVersion);
-                        callbackContext.sendPluginResult(pluginResult);
+                        if (firmwareVersion == null) {
+                            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, new byte[0]);
+                            callbackContext.sendPluginResult(pluginResult);
+                        } else {
+                            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, firmwareVersion);
+                            callbackContext.sendPluginResult(pluginResult);
+                        }
+
                     }
 
                 });
@@ -179,6 +185,10 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
             }
 
             // values = (default), 16, 17, 18, (19, 20), 21, 22, 23
+            if (args == null) {
+                return false;
+            }
+
             int power = args.getInt(0);
 
             boolean result = _uhfManager.setOutputPower(power);
