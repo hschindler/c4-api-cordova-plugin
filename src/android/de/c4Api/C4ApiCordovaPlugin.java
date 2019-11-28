@@ -38,7 +38,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
     private ArrayList<String> _listTID = new ArrayList<String>();
     private ArrayList<EPC> _listEPCObject;
 
-    private boolean runFlag = true;
+    private boolean runFlag = false;
     private boolean startFlag = false;
 
     private String _errorLog;
@@ -48,6 +48,8 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
     private int _barcodePort = 0;
     private int _barcodePower = SerialPort.Power_Scaner;
     private int _barcodeBaudrate = 9600;
+
+    private Thread _scanThread;
 
     private Handler barcodeHandler = new Handler() {
         public void handleMessage(final android.os.Message msg) {
@@ -106,8 +108,8 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
         //
         // }
 
-        Thread thread = new InventoryThread();
-        thread.start();
+        // Thread thread = new InventoryThread();
+        // thread.start();
 
     }
 
@@ -136,8 +138,14 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
                         // String test = "test 1111";
                         // callbackContext.success(firmwareVersion);
 
-                        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, firmwareVersion);
-                        callbackContext.sendPluginResult(pluginResult);
+                        if (firmwareVersion == null) {
+                            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, new byte[0]);
+                            callbackContext.sendPluginResult(pluginResult);
+                        } else {
+                            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, firmwareVersion);
+                            callbackContext.sendPluginResult(pluginResult);
+                        }
+
                     }
 
                 });
@@ -157,10 +165,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
                 callbackContext.error("UHF API not installed");
                 return true;
             }
-
-            // start inventory thread
-            startFlag = true;
-
+            this.StartInventoryThread();
             _listEPCObject = new ArrayList<EPC>();
 
             this._uhfCallBackContext = callbackContext;
@@ -168,7 +173,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
             return true;
 
         } else if (action.equals("stopInventory")) {
-            startFlag = false;
+            this.StopInventoryThread();
             return true;
         } else if (action.equals("setOutputPower")) {
 
@@ -179,6 +184,10 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
             }
 
             // values = (default), 16, 17, 18, (19, 20), 21, 22, 23
+            if (args == null) {
+                return false;
+            }
+
             int power = args.getInt(0);
 
             boolean result = _uhfManager.setOutputPower(power);
@@ -301,6 +310,10 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
         Barcode1DManager.BaudRate = _barcodeBaudrate;
         Barcode1DManager.Port = _barcodePort;
         Barcode1DManager.Power = _barcodePower;
+
+        if (this.runFlag == true) {
+            this.StartInventoryThread();
+        }
         // if (manager == null) {
         // textVersion.setText(getString(R.string.serialport_init_fail_));
         // setButtonClickable(buttonClear, false);
@@ -324,7 +337,8 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
 
     @Override
     public void onDestroy() {
-        runFlag = false;
+        this.StopInventoryThread();
+
         if (this._uhfManager != null) {
             this._uhfManager.close();
         }
@@ -339,7 +353,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
     }
 
     public void onPause() {
-        startFlag = false;
+        this.PauseInventoryThread();
         this._uhfManager.close();
         super.onPause(false);
     }
@@ -404,6 +418,26 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
     // }
     // }
 
+    private void StartInventoryThread() {
+
+        // start inventory thread
+        this._scanThread = new InventoryThread();
+        this._scanThread.start();
+        startFlag = true;
+        runFlag = true;
+    }
+
+    private void StopInventoryThread() {
+        runFlag = false;
+        startFlag = false;
+        this._scanThread.stop();
+    }
+
+    private void PauseInventoryThread() {
+        startFlag = false;
+        this._scanThread.stop();
+    }
+
     private JSONArray ConvertArrayList(ArrayList<String> list) {
         org.json.JSONArray jsonArray = new org.json.JSONArray();
         for (String value : list) {
@@ -423,45 +457,45 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
         @Override
         public void run() {
             super.run();
-            while (runFlag) {
-                if (startFlag) {
-                    // manager.stopInventoryMulti()
-                    epcList = _uhfManager.inventoryRealTime(); // inventory real time
-                    if (epcList != null && !epcList.isEmpty()) {
-                        // play sound
-                        // Util.play(1, 0);
-                        tidList = new ArrayList<String>();
+            while (startFlag) {
+                // if (startFlag) {
+                // manager.stopInventoryMulti()
+                epcList = _uhfManager.inventoryRealTime(); // inventory real time
+                if (epcList != null && !epcList.isEmpty()) {
+                    // play sound
+                    // Util.play(1, 0);
+                    tidList = new ArrayList<String>();
 
-                        for (byte[] epc : epcList) {
-                            // String epcStr = Tools.Bytes2HexString(epc,
-                            // epc.length);
-                            // addToList(_listEPCObject, epcStr);
-                            if (SelectEPC(epc)) {
-                                byte[] tid = GetTID();
+                    for (byte[] epc : epcList) {
+                        // String epcStr = Tools.Bytes2HexString(epc,
+                        // epc.length);
+                        // addToList(_listEPCObject, epcStr);
+                        if (SelectEPC(epc)) {
+                            byte[] tid = GetTID();
 
-                                if (tid != null) {
-                                    String tidStr = Tools.Bytes2HexString(tid, tid.length);
-                                    tidList.add(tidStr);
-                                }
+                            if (tid != null) {
+                                String tidStr = Tools.Bytes2HexString(tid, tid.length);
+                                tidList.add(tidStr);
                             }
                         }
+                    }
 
-                        if (!tidList.isEmpty()) {
-                            if (tidList.size() > 0) {
-                                returnCurrentTIDs(tidList);
-                            }
-
+                    if (!tidList.isEmpty()) {
+                        if (tidList.size() > 0) {
+                            returnCurrentTIDs(tidList);
                         }
 
                     }
-                    epcList = null;
-                    try {
-                        Thread.sleep(40);
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
+
                 }
+                epcList = null;
+                try {
+                    Thread.sleep(40);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                // }
             } // while
         } // run
 
