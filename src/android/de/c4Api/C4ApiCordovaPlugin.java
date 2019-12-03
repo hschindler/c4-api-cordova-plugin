@@ -21,6 +21,8 @@ import java.util.List;
 import cn.pda.serialport.SerialPort;
 import cn.pda.serialport.Tools;
 
+import android.util.Log;
+
 public class C4ApiCordovaPlugin extends CordovaPlugin {
 
     private static final String TAG = "C4ApiCordovaPlugin";
@@ -38,7 +40,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
     private ArrayList<String> _listTID = new ArrayList<String>();
     private ArrayList<EPC> _listEPCObject;
 
-    private boolean runFlag = true;
+    private boolean runFlag = false;
     private boolean startFlag = false;
 
     private String _errorLog;
@@ -48,6 +50,8 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
     private int _barcodePort = 0;
     private int _barcodePower = SerialPort.Power_Scaner;
     private int _barcodeBaudrate = 9600;
+
+    private Thread _scanThread;
 
     private Handler barcodeHandler = new Handler() {
         public void handleMessage(final android.os.Message msg) {
@@ -64,6 +68,13 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
                             pluginResult.setKeepCallback(true);
                             _barcodeCallBackContext.sendPluginResult(pluginResult);
 
+                            _barcodeManager.Close();
+
+                            try {
+                                Thread.sleep(50);
+                            } catch (InterruptedException var2) {
+
+                            }
                         }
                     }
                 }
@@ -74,26 +85,24 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
 
-        // Log.d(TAG, "Initializing C4ApiCordovaPlugin");
+        Log.d(TAG, "Initializing C4ApiCordovaPlugin");
 
         _errorLog = "";
 
         this._uhfCallBackContext = null;
         this._barcodeCallBackContext = null;
-        this._uhfManager = null;
-        UhfManager.Port = _uhfPort;
+        // this._uhfManager = null;
+
+        this.initializeUHFManager();
+
+        Barcode1DManager.BaudRate = _barcodeBaudrate;
+        Barcode1DManager.Port = _barcodePort;
+        Barcode1DManager.Power = _barcodePower;
 
         try {
-            _uhfManager = UhfManager.getInstance();
-        } catch (Exception e) {
-            _errorLog = e.getMessage();
-            e.printStackTrace();
-            // Log.d(TAG, "Error: " + e.getMessage());
-        }
-
-        try {
-            _barcodeManager = new Barcode1DManager();
-            _barcodeManager.Open(barcodeHandler);
+            if (_barcodeManager == null) {
+                _barcodeManager = new Barcode1DManager();
+            }
         } catch (Exception e) {
             _errorLog = e.getMessage();
             e.printStackTrace();
@@ -106,8 +115,8 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
         //
         // }
 
-        Thread thread = new InventoryThread();
-        thread.start();
+        // Thread thread = new InventoryThread();
+        // thread.start();
 
     }
 
@@ -158,15 +167,9 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
             return true;
         } else if (action.equals("startInventory")) {
 
-            if (this._uhfManager == null) {
-                // callbackContext.error("UHF API not installed");
-                callbackContext.error("UHF API not installed");
-                return true;
-            }
+            Log.d(TAG, "startInventory");
 
-            // start inventory thread
-            startFlag = true;
-
+            this.StartInventoryThread();
             _listEPCObject = new ArrayList<EPC>();
 
             this._uhfCallBackContext = callbackContext;
@@ -174,7 +177,8 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
             return true;
 
         } else if (action.equals("stopInventory")) {
-            startFlag = false;
+            Log.d(TAG, "stopInventory");
+            this.StopInventoryThread();
             return true;
         } else if (action.equals("setOutputPower")) {
 
@@ -213,7 +217,22 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
 
             try {
                 this._barcodeCallBackContext = callbackContext;
+
+                Barcode1DManager.BaudRate = _barcodeBaudrate;
+                Barcode1DManager.Port = _barcodePort;
+                Barcode1DManager.Power = _barcodePower;
+
+                _barcodeManager.Open(barcodeHandler);
+
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
                 _barcodeManager.Scan();
+
             } catch (Exception e) {
                 _errorLog = e.getMessage();
 
@@ -226,118 +245,45 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
 
             return true;
 
-            // this._barcodeCallBackContext = callbackContext;
-
-            // String result = "";
-            // // byte[] resultByte = null;
-
-            // if (_barcodeInitFlag) {
-            // try {
-            // boolean is = _barcodeScaner.callbackKeepGoing();
-            // Thread.sleep(50);
-            // _barcodeScaner.waitForDecodeTwo(3000, _barcodeScanerResult);
-            // //_barcodeScaner.waitForDecode(3000) ;
-            // result = _barcodeScaner.getBarcodeData();
-            // // resultByte = _barcodeScaner.getBarcodeByteData();
-            // if (result != null) {
-            // // Log.e(TAG, result);
-            // PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
-            // _barcodeCallBackContext.sendPluginResult(pluginResult);
-            // }
-            // } catch (DecoderException e) {
-            // // TODO Auto-generated catch block
-            // // e.printStackTrace();
-            // _errorLog = e.getMessage();
-
-            // PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR,
-            // _errorLog);
-            // pluginResult.setKeepCallback(true);
-            // _barcodeCallBackContext.sendPluginResult(pluginResult);
-
-            // return true;
-            // } catch (InterruptedException e) {
-            // // TODO Auto-generated catch block
-            // // e.printStackTrace();
-
-            // _errorLog = e.getMessage();
-
-            // PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR,
-            // _errorLog);
-            // pluginResult.setKeepCallback(true);
-            // _barcodeCallBackContext.sendPluginResult(pluginResult);
-
-            // return true;
-            // }
-            // } else {
-
-            // callbackContext.error("Barcode API not installed");
-            // return true;
-            // }
-
-            // callbackContext.error("Barcode read success");
-            // return true;
-
-            // -------
-            // try {
-            // this._barcodeCallBackContext = callbackContext;
-            // _barcodeManager.Scan();
-            // } catch (Exception e) {
-            // _errorLog = e.getMessage();
-
-            // PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR,
-            // _errorLog);
-            // pluginResult.setKeepCallback(true);
-            // _barcodeCallBackContext.sendPluginResult(pluginResult);
-
-            // return false;
-            // }
-
-            // return true;
         }
 
         return false;
     }
 
-    public void onResume() {
+    public void onResume(boolean multitasking) {
         // TODO Auto-generated method stub
-        super.onResume(false);
+        // super.onResume(multitasking);
 
-        UhfManager.Port = _uhfPort;
-        UhfManager.BaudRate = 115200;
-        UhfManager.Power = SerialPort.Power_Rfid;
+        Log.d(TAG, "onResume - runFlag: " + String.valueOf(startFlag));
 
-        this._uhfManager = UhfManager.getInstance();
+        this.initializeUHFManager();
 
-        Barcode1DManager.BaudRate = _barcodeBaudrate;
-        Barcode1DManager.Port = _barcodePort;
-        Barcode1DManager.Power = _barcodePower;
-        // if (manager == null) {
-        // textVersion.setText(getString(R.string.serialport_init_fail_));
-        // setButtonClickable(buttonClear, false);
-        // setButtonClickable(buttonStart, false);
-        // return;
-        // }
-        // try {
-        // Thread.sleep(1000);
-        // } catch (InterruptedException e) {
-        // e.printStackTrace();
-        // }
+        if (this.runFlag == true) {
+            this.StartInventoryThread();
+        }
 
-        // manager.setOutputPower(power);
-        // manager.setWorkArea(area);
-        // byte[] version_bs = manager.getFirmware();
-        // setTitle(R.string.uhf_demo);
-        // if (version_bs!=null){
-        // textView_title_config.append("-"+new String(version_bs));
-        // }
     }
 
-    @Override
-    public void onDestroy() {
-        runFlag = false;
-        if (this._uhfManager != null) {
-            this._uhfManager.close();
+    public void onRestart() {
+        // TODO Auto-generated method stub
+        // super.onRestart();
+
+        Log.d(TAG, "onRestart");
+
+        this.initializeUHFManager();
+
+        if (this.runFlag == true) {
+            this.StartInventoryThread();
         }
+    }
+
+    public void onDestroy() {
+        // super.onDestroy();
+        Log.d(TAG, "onDestroy");
+
+        this.StopInventoryThread();
+
+        this.disposeUHFManager();
 
         if (_barcodeManager != null) {
             _barcodeManager.Close();
@@ -345,74 +291,81 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
 
         // closeBarcode();
 
-        super.onDestroy();
     }
 
-    public void onPause() {
+    public void onStop() {
+        // super.onStop();
+
+        Log.d(TAG, "onStop");
+        this.StopInventoryThread();
+
+        if (_barcodeManager != null) {
+            _barcodeManager.Close();
+        }
+
+    }
+
+    public void onPause(boolean multitasking) {
+        // super.onPause(multitasking);
+        Log.d(TAG, "onPause");
+        this.StopInventoryThread();
+
+        if (_barcodeManager != null) {
+            _barcodeManager.Close();
+        }
+    }
+
+    private void initializeUHFManager() {
+
+        if (this._uhfManager == null) {
+            UhfManager.Port = _uhfPort;
+            UhfManager.BaudRate = 115200;
+            UhfManager.Power = SerialPort.Power_Rfid;
+
+            try {
+                this._uhfManager = UhfManager.getInstance();
+            } catch (Exception e) {
+                _errorLog = e.getMessage();
+                e.printStackTrace();
+                // Log.d(TAG, "Error: " + e.getMessage());
+            }
+        }
+    }
+
+    private void disposeUHFManager() {
+
+        if (this._uhfManager != null) {
+            Log.d(TAG, "disposeUHFManager");
+            this._uhfManager.close();
+            this._uhfManager = null;
+        }
+    }
+
+    private void StartInventoryThread() {
+
+        Log.d(TAG, "StartInventoryThread");
+
+        // start inventory thread
+        startFlag = true;
+        runFlag = true;
+
+        if (this._scanThread == null) {
+            Log.d(TAG, "StartInventoryThread - create new thread");
+            this._scanThread = new InventoryThread();
+        }
+
+        Log.d(TAG, "StartInventoryThread - start thread");
+        this._scanThread.start();
+    }
+
+    private void StopInventoryThread() {
+        runFlag = false;
         startFlag = false;
-        this._uhfManager.close();
-        super.onPause(false);
     }
 
-    // private JSONArray ConvertList(List<String> list) {
-    // org.json.JSONArray jsonArray = new org.json.JSONArray();
-    // for(String value : list) {
-    // jsonArray.put(value);
-    // }
-
-    // return jsonArray;
-    // }
-
-    // private void initBarcode() {
-    // try {
-    // _barcodeScaner.disableSymbology(SymbologyID.SYM_ALL);
-    // _barcodeScaner.enableSymbology(SymbologyID.SYM_ALL);
-    // // mDecoder.enableSymbology(SymbologyID.SYM_QR);
-    // // mDecoder.enableSymbology(SymbologyID.SYM_PDF417);
-    // // mDecoder.enableSymbology(SymbologyID.SYM_EAN13);
-    // // mDecoder.enableSymbology(SymbologyID.SYM_DATAMATRIX) ;
-    // //
-    // // mDecoder.enableSymbology(SymbologyID.SYM_INT25);
-
-    // // mDecoder.enableSymbology(SymbologyID.SYM_UPCA);
-    // // mDecoder.enableSymbology(SymbologyID.SYM_CHINAPOST);
-    // //
-    // // mDecoder.enableSymbology(SymbologyID.SYM_CODE39);
-    // // mDecoder.enableSymbology(SymbologyID.SYM_CODE128);
-    // // mDecoder.enableSymbology(SymbologyID.SYM_EAN8);
-    // // mDecoder.enableSymbology(SymbologyID.SYM_CODE32);
-    // //EAN13
-    // SymbologyConfig config = new SymbologyConfig(SymbologyID.SYM_EAN13);
-    // config.Flags = 5;
-    // config.Mask = 1;
-    // _barcodeScaner.setSymbologyConfig(config);
-
-    // _barcodeScaner.setLightsMode(LightsMode.ILLUM_AIM_ON);
-    // try {
-    // _barcodeScaner.startScanning();
-    // Thread.sleep(50);
-    // _barcodeScaner.stopScanning();
-    // } catch (Exception e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-
-    // } catch (DecoderException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    // }
-
-    // public void closeBarcode() {
-    // if (_barcodeInitFlag) {
-    // try {
-    // _barcodeScaner.disconnectDecoderLibrary();
-    // } catch (DecoderException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    // }
-    // }
+    private void PauseInventoryThread() {
+        startFlag = false;
+    }
 
     private JSONArray ConvertArrayList(ArrayList<String> list) {
         org.json.JSONArray jsonArray = new org.json.JSONArray();
@@ -433,19 +386,31 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
         @Override
         public void run() {
             super.run();
-            while (runFlag) {
-                if (startFlag) {
-                    // manager.stopInventoryMulti()
+
+            Log.d(TAG, "InventoryThread starting...");
+
+            if (_uhfManager == null) {
+                Log.d(TAG, "InventoryThread creating new _uhfManager");
+                _uhfManager = UhfManager.getInstance();
+            }
+
+            Log.d(TAG, "InventoryThread startflag = " + String.valueOf(startFlag));
+
+            while (startFlag) {
+
+                Log.d(TAG, "Waiting for timeout..");
+
+                if (_uhfManager != null) {
+
                     epcList = _uhfManager.inventoryRealTime(); // inventory real time
+
                     if (epcList != null && !epcList.isEmpty()) {
                         // play sound
                         // Util.play(1, 0);
                         tidList = new ArrayList<String>();
 
                         for (byte[] epc : epcList) {
-                            // String epcStr = Tools.Bytes2HexString(epc,
-                            // epc.length);
-                            // addToList(_listEPCObject, epcStr);
+
                             if (SelectEPC(epc)) {
                                 byte[] tid = GetTID();
 
@@ -464,21 +429,34 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
                         }
 
                     }
-                    epcList = null;
-                    try {
-                        Thread.sleep(40);
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
+
+                } else {
+                    returnCurrentTIDs(null);
                 }
+
+                epcList = null;
+
+                try {
+                    Thread.sleep(40);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+                // }
             } // while
+
+            Log.d(TAG, "InventoryThread is closing...");
+
+            disposeUHFManager();
+
         } // run
 
         private boolean SelectEPC(byte[] epc) {
             try {
-                _uhfManager.selectEPC(epc);
-
+                if (_uhfManager != null) {
+                    _uhfManager.selectEPC(epc);
+                }
             } catch (Exception ex) {
                 if (_uhfCallBackContext != null) {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR,
@@ -504,11 +482,19 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
             int tidLength = 6; // in word 1 word = 2 byte
             // byte[] tid; // = new byte[tidLength*2];
 
+            if (_uhfManager == null) {
+                return null;
+            }
+
+            Log.d(TAG, "GetTID");
+
             try {
                 byte[] pw = new byte[4];
                 byte[] tid = _uhfManager.readFrom6C(2, 0, tidLength, pw);
 
                 if (tid != null && tid.length > 1) {
+
+                    Log.d(TAG, "GetTID - " + tid);
                     return tid;
 
                 } else {
