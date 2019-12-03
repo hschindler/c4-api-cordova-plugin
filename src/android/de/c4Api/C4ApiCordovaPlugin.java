@@ -93,14 +93,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
         this._barcodeCallBackContext = null;
         // this._uhfManager = null;
 
-        try {
-            this.initializeUHFManager();
-
-        } catch (Exception e) {
-            _errorLog = e.getMessage();
-            e.printStackTrace();
-            // Log.d(TAG, "Error: " + e.getMessage());
-        }
+        this.initializeUHFManager();
 
         Barcode1DManager.BaudRate = _barcodeBaudrate;
         Barcode1DManager.Port = _barcodePort;
@@ -261,7 +254,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
         // TODO Auto-generated method stub
         // super.onResume(multitasking);
 
-        Log.d(TAG, "onResume");
+        Log.d(TAG, "onResume - runFlag: " + String.valueOf(startFlag));
 
         this.initializeUHFManager();
 
@@ -329,7 +322,13 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
             UhfManager.BaudRate = 115200;
             UhfManager.Power = SerialPort.Power_Rfid;
 
-            this._uhfManager = UhfManager.getInstance();
+            try {
+                this._uhfManager = UhfManager.getInstance();
+            } catch (Exception e) {
+                _errorLog = e.getMessage();
+                e.printStackTrace();
+                // Log.d(TAG, "Error: " + e.getMessage());
+            }
         }
     }
 
