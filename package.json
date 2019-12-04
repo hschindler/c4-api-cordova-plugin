@@ -1,6 +1,6 @@
 {
   "name": "c4-api-cordova-plugin",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Cordova Plugin for ID Tronic C4 Red PDA",
   "cordova": {
     "id": "c4-api-cordova-plugin",
