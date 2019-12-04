@@ -51,6 +51,8 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
     private int _barcodePower = SerialPort.Power_Scaner;
     private int _barcodeBaudrate = 9600;
 
+    private int _outputPower = 0;
+
     private Thread _scanThread;
 
     private Handler barcodeHandler = new Handler() {
@@ -59,7 +61,12 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
 
                 public void run() {
 
+                    Log.d(TAG, "handleMessage");
+
                     if (msg.what == Barcode1DManager.Barcode1D) {
+
+                        Log.d(TAG, "handleMessage - Barcode1D");
+
                         String data = msg.getData().getString("data");
 
                         if (_barcodeCallBackContext != null) {
@@ -68,8 +75,6 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
                             pluginResult.setKeepCallback(true);
                             _barcodeCallBackContext.sendPluginResult(pluginResult);
 
-                            _barcodeManager.Close();
-
                             try {
                                 Thread.sleep(50);
                             } catch (InterruptedException var2) {
@@ -77,6 +82,10 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
                             }
                         }
                     }
+
+                    Log.d(TAG, "handleMessage - close Barcode");
+                    closeBarcodeManager();
+
                 }
             });
         };
@@ -93,7 +102,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
         this._barcodeCallBackContext = null;
         // this._uhfManager = null;
 
-        this.initializeUHFManager();
+        // this.initializeUHFManager();
 
         Barcode1DManager.BaudRate = _barcodeBaudrate;
         Barcode1DManager.Port = _barcodePort;
@@ -136,7 +145,12 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
             }
 
             try {
+
+                this.initializeUHFManager();
+
                 final byte[] firmwareVersion = _uhfManager.getFirmware();
+
+                this.disposeUHFManager();
 
                 cordova.getActivity().runOnUiThread(new Runnable() {
 
@@ -182,21 +196,24 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
             return true;
         } else if (action.equals("setOutputPower")) {
 
-            if (this._uhfManager == null) {
-                // callbackContext.error("UHF API not installed");
-                callbackContext.error("UHF API not installed");
-                return true;
-            }
+            // this.initializeUHFManager();
+
+            // if (this._uhfManager == null) {
+            // // callbackContext.error("UHF API not installed");
+            // callbackContext.error("UHF API not installed");
+            // return true;
+            // }
 
             // values = (default), 16, 17, 18, (19, 20), 21, 22, 23
             if (args == null) {
                 return false;
             }
 
-            int power = args.getInt(0);
+            this._outputPower = args.getInt(0);
 
-            boolean result = _uhfManager.setOutputPower(power);
-            return result;
+            // int power = args.getInt(0);
+            // boolean result = _uhfManager.setOutputPower(power);
+            return true;
 
         } else if (action.equals("openBarcode")) {
 
@@ -256,7 +273,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
 
         Log.d(TAG, "onResume - runFlag: " + String.valueOf(startFlag));
 
-        this.initializeUHFManager();
+        // this.initializeUHFManager();
 
         if (this.runFlag == true) {
             this.StartInventoryThread();
@@ -270,7 +287,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
 
         Log.d(TAG, "onRestart");
 
-        this.initializeUHFManager();
+        // this.initializeUHFManager();
 
         if (this.runFlag == true) {
             this.StartInventoryThread();
@@ -285,9 +302,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
 
         this.disposeUHFManager();
 
-        if (_barcodeManager != null) {
-            _barcodeManager.Close();
-        }
+        this.closeBarcodeManager();
 
         // closeBarcode();
 
@@ -299,9 +314,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
         Log.d(TAG, "onStop");
         this.StopInventoryThread();
 
-        if (_barcodeManager != null) {
-            _barcodeManager.Close();
-        }
+        this.closeBarcodeManager();
 
     }
 
@@ -310,9 +323,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
         Log.d(TAG, "onPause");
         this.StopInventoryThread();
 
-        if (_barcodeManager != null) {
-            _barcodeManager.Close();
-        }
+        this.closeBarcodeManager();
     }
 
     private void initializeUHFManager() {
@@ -324,6 +335,11 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
 
             try {
                 this._uhfManager = UhfManager.getInstance();
+
+                if (this._outputPower > 0) {
+                    boolean result = _uhfManager.setOutputPower(this._outputPower);
+                }
+
             } catch (Exception e) {
                 _errorLog = e.getMessage();
                 e.printStackTrace();
@@ -332,11 +348,30 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
         }
     }
 
+    private void closeBarcodeManager() {
+        if (_barcodeManager != null) {
+            Log.d(TAG, "closeBarcodeManager");
+
+            try {
+                _barcodeManager.Close();
+            } catch (Exception e) {
+                _errorLog = e.getMessage();
+            }
+
+        }
+    }
+
     private void disposeUHFManager() {
 
         if (this._uhfManager != null) {
             Log.d(TAG, "disposeUHFManager");
-            this._uhfManager.close();
+
+            try {
+                this._uhfManager.close();
+            } catch (Exception e) {
+                _errorLog = e.getMessage();
+            }
+
             this._uhfManager = null;
         }
     }
@@ -389,10 +424,12 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
 
             Log.d(TAG, "InventoryThread starting...");
 
-            if (_uhfManager == null) {
-                Log.d(TAG, "InventoryThread creating new _uhfManager");
-                _uhfManager = UhfManager.getInstance();
-            }
+            initializeUHFManager();
+            // if (_uhfManager == null) {
+            // Log.d(TAG, "InventoryThread creating new _uhfManager");
+            // _uhfManager = UhfManager.getInstance();
+
+            // }
 
             Log.d(TAG, "InventoryThread startflag = " + String.valueOf(startFlag));
 
