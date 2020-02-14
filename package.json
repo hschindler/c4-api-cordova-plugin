@@ -1,6 +1,6 @@
 {
   "name": "c4-api-cordova-plugin",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Cordova Plugin for ID Tronic C4 Red PDA",
   "cordova": {
     "id": "c4-api-cordova-plugin",
@@ -13,7 +13,7 @@
     "url": "https://github.com/hschindler/c4-api-cordova-plugin.git"
   },
   "author": {
-    "name": "Heiko Schindler"
+    "name": "Schindler Solutions GmbH"
   },
   "engines": {
     "cordovaDependencies": {
