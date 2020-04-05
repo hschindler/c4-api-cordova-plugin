@@ -1,6 +1,4 @@
-/**
- */
-package de.c4Api;
+package de.schindlergmbh.cordova.c4;
 
 import android.os.Handler;
 
@@ -40,7 +38,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
     private ArrayList<String> _listTID = new ArrayList<String>();
     private ArrayList<EPC> _listEPCObject;
 
-    private boolean runFlag = false;
+    // private boolean runFlag = false;
     private boolean startFlag = false;
 
     private String _errorLog;
@@ -271,13 +269,13 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
         // TODO Auto-generated method stub
         // super.onResume(multitasking);
 
-        Log.d(TAG, "onResume - runFlag: " + String.valueOf(startFlag));
+        Log.d(TAG, "onResume - startFlag: " + String.valueOf(startFlag));
 
         // this.initializeUHFManager();
 
-        if (this.runFlag == true) {
-            this.StartInventoryThread();
-        }
+        // if (this.startFlag == true) {
+        // this.StartInventoryThread();
+        // }
 
     }
 
@@ -285,13 +283,13 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
         // TODO Auto-generated method stub
         // super.onRestart();
 
-        Log.d(TAG, "onRestart");
+        Log.d(TAG, "onRestart - startFlag: " + String.valueOf(startFlag));
 
         // this.initializeUHFManager();
 
-        if (this.runFlag == true) {
-            this.StartInventoryThread();
-        }
+        // if (this.startFlag == true) {
+        // this.StartInventoryThread();
+        // }
     }
 
     public void onDestroy() {
@@ -327,6 +325,8 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
     }
 
     private void initializeUHFManager() {
+
+        Log.d(TAG, "initializeUHFManager C4ApiCordovaPlugin");
 
         if (this._uhfManager == null) {
             UhfManager.Port = _uhfPort;
@@ -382,7 +382,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
 
         // start inventory thread
         startFlag = true;
-        runFlag = true;
+        // runFlag = true;
 
         if (this._scanThread == null) {
             Log.d(TAG, "StartInventoryThread - create new thread");
@@ -394,7 +394,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
     }
 
     private void StopInventoryThread() {
-        runFlag = false;
+        // runFlag = false;
         startFlag = false;
     }
 
