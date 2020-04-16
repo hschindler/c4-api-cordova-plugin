@@ -1,4 +1,4 @@
-package de.c4Api;
+package de.schindlergmbh.cordova.c4;
 
 public class EPC {
 	private int id;
@@ -47,7 +47,9 @@ public class EPC {
 		this.count = count;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
