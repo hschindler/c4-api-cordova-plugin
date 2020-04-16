@@ -139,14 +139,14 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
 
         if (action.equals("getFirmware")) {
 
-            if (_uhfManager == null) {
-                callbackContext.error("UHF API not installed");
-                return true;
-            }
-
             try {
 
                 this.initializeUHFManager();
+
+                if (_uhfManager == null) {
+                    callbackContext.error("UHF API not installed");
+                    return true;
+                }
 
                 final byte[] firmwareVersion = _uhfManager.getFirmware();
 
@@ -412,7 +412,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
     }
 
     /**
-     * Inventory EPC Thread
+     * Inventory Thread
      */
     class InventoryThread extends Thread {
         private List<byte[]> epcList;
