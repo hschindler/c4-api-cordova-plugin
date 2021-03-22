@@ -182,6 +182,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
             Log.d(TAG, "startInventory");
 
             this.StartInventoryThread();
+
             _listEPCObject = new ArrayList<EPC>();
 
             this._uhfCallBackContext = callbackContext;
@@ -461,6 +462,7 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
                         if (!tidList.isEmpty()) {
                             if (tidList.size() > 0) {
                                 returnCurrentTIDs(tidList);
+                                startFlag = false;
                             }
 
                         }
@@ -468,7 +470,8 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
                     }
 
                 } else {
-                    returnCurrentTIDs(null);
+                    // returnCurrentTIDs(null);
+                    _uhfCallBackContext.error('UHFManager is not initialized!');
                 }
 
                 epcList = null;
@@ -476,7 +479,6 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
                 try {
                     Thread.sleep(40);
                 } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
 
@@ -576,11 +578,11 @@ public class C4ApiCordovaPlugin extends CordovaPlugin {
 
             public void run() {
                 if (_uhfCallBackContext != null) {
-                    if (!tidList.isEmpty()) {
+                    if (tidList != null || tidList.isEmpty() == false) {
                         PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, ConvertArrayList(tidList));
                         pluginResult.setKeepCallback(true);
                         _uhfCallBackContext.sendPluginResult(pluginResult);
-                    }
+                    } 
 
                 }
             }
